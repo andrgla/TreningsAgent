@@ -1,0 +1,7 @@
+mcp[cli]>=1.2.0
+httpx>=0.27
+garminconnect>=0.2.25
+
+# Headless coach automation (scripts/run_coach_agent.py). Optional: only needed
+# for the coach-weekly / coach-quarterly scheduled jobs.
+cursor-sdk

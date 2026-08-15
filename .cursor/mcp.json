@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "calendar": {
+      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "args": [
+        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/calendar_mcp.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers",
+        "APPLE_BRIDGE_BIN": "${workspaceFolder}/node_modules/apple-calendar-mcp/swift/.build/release/apple-bridge",
+        "TRAINING_CALENDAR_NAME": "Trening"
+      }
+    },
+    "garmin": {
+      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "args": [
+        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/garmin_mcp.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers",
+        "GARMINTOKENS": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/data/.garminconnect"
+      },
+      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+    },
+    "sio-gym": {
+      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "args": [
+        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/sio_gym_mcp.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers"
+      },
+      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+    },
+    "notion": {
+      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "args": [
+        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/notion_mcp.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent"
+      },
+      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+    }
+  }
+}

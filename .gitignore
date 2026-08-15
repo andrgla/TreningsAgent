@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.local
+
+# Personal health adaptations (keep ATHLETE.example.md tracked)
+ATHLETE.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node (calendar MCP)
+node_modules/
+
+# Cached auth tokens (never commit)
+sio_auth.json
+.garminconnect/
+data/.garminconnect/
+data/.garmin.lock
+
+# OS
+.DS_Store
+
+# Scheduled job logs
+logs/

@@ -1,0 +1,17 @@
+{
+  "name": "treningsagent",
+  "version": "1.0.0",
+  "description": "A personal training assistant that runs on Cursor (or any MCP client) with live access to:",
+  "main": "index.js",
+  "scripts": {
+    "calendar:doctor": "node node_modules/apple-calendar-mcp/build/index.js doctor || node_modules/apple-calendar-mcp/swift/.build/release/apple-bridge doctor"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@l22-io/orchard-mcp": "^0.6.4",
+    "apple-calendar-mcp": "^1.0.1"
+  }
+}
