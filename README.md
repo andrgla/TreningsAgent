@@ -10,6 +10,12 @@ access to:
 
 Goal it's set up for: **Trondheim Halvmaraton at 5:25/km pace** (see `AGENTS.md`).
 
+### Example week on Apple Calendar
+
+Training sessions land on the **Trening** calendar around life (study, social, travel):
+
+![Example Trening calendar week](images/example-calendar.png)
+
 ## Layout
 
 ```
