@@ -1,46 +1,46 @@
 {
   "mcpServers": {
     "calendar": {
-      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
-        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/calendar_mcp.py"
+        "${workspaceFolder}/servers/calendar_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers",
+        "PYTHONPATH": "${workspaceFolder}/servers",
         "APPLE_BRIDGE_BIN": "${workspaceFolder}/node_modules/apple-calendar-mcp/swift/.build/release/apple-bridge",
         "TRAINING_CALENDAR_NAME": "Trening"
       }
     },
     "garmin": {
-      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
-        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/garmin_mcp.py"
+        "${workspaceFolder}/servers/garmin_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers",
-        "GARMINTOKENS": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/data/.garminconnect"
+        "PYTHONPATH": "${workspaceFolder}/servers",
+        "GARMINTOKENS": "${workspaceFolder}/data/.garminconnect"
       },
-      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+      "envFile": "${workspaceFolder}/.env"
     },
     "sio-gym": {
-      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
-        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/sio_gym_mcp.py"
+        "${workspaceFolder}/servers/sio_gym_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers"
+        "PYTHONPATH": "${workspaceFolder}/servers"
       },
-      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+      "envFile": "${workspaceFolder}/.env"
     },
     "notion": {
-      "command": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.venv/bin/python",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
-        "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/servers/notion_mcp.py"
+        "${workspaceFolder}/servers/notion_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent"
+        "PYTHONPATH": "${workspaceFolder}"
       },
-      "envFile": "/Users/andreagladhaug/Documents/Egne Prosjekter/TreningsAgent/.env"
+      "envFile": "${workspaceFolder}/.env"
     }
   }
 }

@@ -84,7 +84,9 @@ Cursor.
    ```
 
 2. **Add credentials**: copy `.env.example` → `.env` (Garmin + SiO + Notion).
-   Calendar needs no secrets.
+   Set `NOTION_WORKOUT_COACH_PAGE_ID` to *your* Workout Coach page id. Calendar
+   needs no secrets; writes only go to `TRAINING_CALENDAR_NAME` (default
+   **Trening**).
 
 3. **Notion program** (one-time):
 

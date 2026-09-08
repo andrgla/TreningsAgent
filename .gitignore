@@ -18,6 +18,7 @@ sio_auth.json
 .garminconnect/
 data/.garminconnect/
 data/.garmin.lock
+data/notion_state.json
 
 # OS
 .DS_Store

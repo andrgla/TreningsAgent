@@ -12,7 +12,6 @@ from typing import Any
 NOTION_VERSION = "2022-06-28"
 ROOT = Path(__file__).resolve().parents[1]
 STATE_PATH = ROOT / "data" / "notion_state.json"
-DEFAULT_PAGE_ID = "39427249eb4d806a8686d0ebc552d487"
 
 
 def _token() -> str:
@@ -34,7 +33,13 @@ def _headers() -> dict[str, str]:
 
 
 def workout_coach_page_id() -> str:
-    return os.environ.get("NOTION_WORKOUT_COACH_PAGE_ID", DEFAULT_PAGE_ID).strip()
+    page_id = os.environ.get("NOTION_WORKOUT_COACH_PAGE_ID", "").strip()
+    if not page_id:
+        raise RuntimeError(
+            "NOTION_WORKOUT_COACH_PAGE_ID is not set. Put your Workout Coach "
+            "Notion page id in .env (see .env.example)."
+        )
+    return page_id
 
 
 def md_rich_text(text: str) -> list[dict]:

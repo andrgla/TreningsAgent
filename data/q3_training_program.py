@@ -5,8 +5,6 @@ Race target: 21.1 km @ 5:25/km (~1:54:20), race ~early September 2026.
 
 from __future__ import annotations
 
-NOTION_WORKOUT_COACH_PAGE_ID = "39427249eb4d806a8686d0ebc552d487"
-
 PROGRAM_OVERVIEW = """# 🏃‍♀️ Trondheim Halvmaraton — Q3 glow-up (Jul–Aug 2026)
 
 **Race:** ~early September 2026 · **Target:** 5:25/km · **Finish:** ~1:54:20 ✨

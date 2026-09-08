@@ -1,7 +1,7 @@
 """Apple Calendar MCP with Trening-only write access.
 
 Reads all calendars. Creates and deletes events only on the calendar named
-Trening (configurable via TRAINING_CALENDAR_NAME).
+Trening (configurable via TRAINING_CALENDAR_NAME or CALENDAR_WRITABLE_NAME).
 """
 
 from __future__ import annotations
@@ -22,7 +22,11 @@ from apple_bridge import (
 
 mcp = FastMCP("calendar")
 
-WRITE_CALENDAR = os.environ.get("TRAINING_CALENDAR_NAME", "Trening").strip().lower()
+WRITE_CALENDAR = (
+    os.environ.get("TRAINING_CALENDAR_NAME")
+    or os.environ.get("CALENDAR_WRITABLE_NAME")
+    or "Trening"
+).strip().lower()
 _trening_id: str | None = None
 
 

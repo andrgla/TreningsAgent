@@ -168,9 +168,6 @@ def populate_weeks(database_id: str) -> None:
 
 
 def main() -> int:
-    page_id = workout_coach_page_id()
-    print(f"Workout Coach page: {page_id}", flush=True)
-
     if not os.environ.get("NOTION_TOKEN", "").strip():
         print(
             "ERROR: NOTION_TOKEN is not set in .env\n\n"
@@ -178,11 +175,24 @@ def main() -> int:
             "1. https://www.notion.so/my-integrations → New integration\n"
             "2. Copy secret → NOTION_TOKEN in .env\n"
             "3. Open Workout Coach page → ... → Connect to → your integration\n"
-            "4. Re-run this script",
+            "4. Set NOTION_WORKOUT_COACH_PAGE_ID to that page's id\n"
+            "5. Re-run this script",
             file=sys.stderr,
             flush=True,
         )
         return 1
+
+    if not os.environ.get("NOTION_WORKOUT_COACH_PAGE_ID", "").strip():
+        print(
+            "ERROR: NOTION_WORKOUT_COACH_PAGE_ID is not set in .env\n"
+            "Copy the 32-char id from your Workout Coach Notion URL.",
+            file=sys.stderr,
+            flush=True,
+        )
+        return 1
+
+    page_id = workout_coach_page_id()
+    print(f"Workout Coach page: {page_id}", flush=True)
 
     try:
         page = get_page(page_id)

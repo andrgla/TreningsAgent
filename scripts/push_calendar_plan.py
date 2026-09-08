@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -21,7 +22,11 @@ from apple_bridge import (  # noqa: E402
     list_events,
 )
 
-WRITE_CALENDAR = "Trening"
+WRITE_CALENDAR = (
+    os.environ.get("TRAINING_CALENDAR_NAME")
+    or os.environ.get("CALENDAR_WRITABLE_NAME")
+    or "Trening"
+).strip()
 TIME_ZONE = "Europe/Oslo"
 _TZ = ZoneInfo(TIME_ZONE)
 
