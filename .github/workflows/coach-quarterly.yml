@@ -1,0 +1,74 @@
+name: coach-quarterly
+
+# Runs daily and exits in seconds unless the current training block ends within
+# ~8 days — the gate lives in run_coach_agent.py, not in the cron expression.
+# When it does fire, it designs the next block and publishes it to Notion.
+on:
+  schedule:
+    - cron: "0 8 * * *" # 09:00 Oslo (CET)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build the next block even if the program isn't ending soon.
+        type: boolean
+        default: false
+
+concurrency:
+  group: garmin
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          agent: "true"
+          athlete-md-b64: ${{ secrets.ATHLETE_MD_B64 }}
+          notion-state-json: ${{ secrets.NOTION_STATE_JSON }}
+          garmin-tokens-b64: ${{ secrets.GARMIN_TOKENS_B64 }}
+
+      - name: Generate the next training block
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_WORKOUT_COACH_PAGE_ID: ${{ secrets.NOTION_WORKOUT_COACH_PAGE_ID }}
+          ICLOUD_USERNAME: ${{ secrets.ICLOUD_USERNAME }}
+          ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
+          CALENDAR_BACKEND: caldav
+          TRAINING_CALENDAR_NAME: Trening
+        run: |
+          python scripts/run_coach_agent.py quarterly \
+            ${{ inputs.force && '--force' || '' }}
+
+      # A new block rewrites PROGRAM_OVERVIEW / WEEKS / DB_TITLE, and
+      # bootstrap_notion.py records the new database id in notion_state.json.
+      - name: Commit the new block
+        run: |
+          if [[ -z "$(git status --porcelain data/q3_training_program.py)" ]]; then
+            echo "No program changes to commit."
+            exit 0
+          fi
+          git config user.name "treningsagent[bot]"
+          git config user.email "treningsagent@users.noreply.github.com"
+          git add data/q3_training_program.py
+          git commit -m "coach-quarterly: new training block $(date -u +%Y-%m-%d)"
+          git push
+
+      # notion_state.json is gitignored, so the new database id would otherwise
+      # be lost with the runner. Surface it for the operator to store.
+      - name: Report the new Notion state
+        if: always()
+        run: |
+          if [[ -f data/notion_state.json ]]; then
+            echo "notion_state.json after this run (update the NOTION_STATE_JSON secret if the database id changed):"
+            python -c "import json;print(json.dumps(json.load(open('data/notion_state.json')),indent=2))"
+          fi

@@ -1,0 +1,65 @@
+name: coach-weekly
+
+# The job this whole migration exists for: every Sunday evening, plan next
+# week's sessions from Garmin recovery + Notion targets + calendar availability,
+# and write them to the Trening calendar over iCloud CalDAV.
+#
+# Cron is UTC; this is Europe/Oslo winter time (CET) and lands an hour later in
+# summer. Both are Sunday evening, which is what matters.
+on:
+  schedule:
+    - cron: "0 17 * * 0" # Sun 18:00 Oslo
+  workflow_dispatch:
+
+concurrency:
+  group: garmin
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          agent: "true"
+          athlete-md-b64: ${{ secrets.ATHLETE_MD_B64 }}
+          notion-state-json: ${{ secrets.NOTION_STATE_JSON }}
+          garmin-tokens-b64: ${{ secrets.GARMIN_TOKENS_B64 }}
+
+      - name: Generate next week's sessions
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_WORKOUT_COACH_PAGE_ID: ${{ secrets.NOTION_WORKOUT_COACH_PAGE_ID }}
+          ICLOUD_USERNAME: ${{ secrets.ICLOUD_USERNAME }}
+          ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
+          SIO_USERNAME: ${{ secrets.SIO_USERNAME }}
+          SIO_PASSWORD: ${{ secrets.SIO_PASSWORD }}
+          # Reads only — the coach must never book a class unattended.
+          SIO_ALLOW_BOOKING: ""
+          CALENDAR_BACKEND: caldav
+          TRAINING_CALENDAR_NAME: Trening
+        run: python scripts/run_coach_agent.py weekly
+
+      # The agent rewrites CALENDAR_WEEK in data/q3_training_program.py as part
+      # of planning. Keeping that commit means the repo always shows the week
+      # that was actually pushed to the calendar.
+      - name: Commit the generated week
+        run: |
+          if [[ -z "$(git status --porcelain data/q3_training_program.py)" ]]; then
+            echo "No plan changes to commit."
+            exit 0
+          fi
+          git config user.name "treningsagent[bot]"
+          git config user.email "treningsagent@users.noreply.github.com"
+          git add data/q3_training_program.py
+          git commit -m "coach-weekly: plan for week of $(date -u +%Y-%m-%d)"
+          git push

@@ -15,7 +15,8 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "servers"))
 
 from data.q3_training_program import CALENDAR_WEEK  # noqa: E402
-from apple_bridge import (  # noqa: E402
+from calendar_backend import (  # noqa: E402
+    backend_name,
     create_event,
     delete_event,
     list_calendars,
@@ -127,7 +128,7 @@ def main() -> int:
     args = parser.parse_args()
 
     cal_id = trening_calendar_id()
-    print(f"Target calendar: {WRITE_CALENDAR} ({cal_id})\n")
+    print(f"Target calendar: {WRITE_CALENDAR} via {backend_name()} ({cal_id})\n")
 
     groups = existing_events(cal_id) if args.confirm else {}
     plan_keys = {(s["title"].strip(), s["date"]) for s in CALENDAR_WEEK}

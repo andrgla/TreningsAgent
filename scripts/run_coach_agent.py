@@ -2,23 +2,26 @@
 """Headless coach: run the training-coach-loop skill on a schedule.
 
 Unlike the deterministic scripts, generating a week of sessions and a quarter
-plan is *agent* work — it reads Garmin readiness, infers drinking days from the
+plan is *agent* work - it reads Garmin readiness, infers drinking days from the
 calendar, respects the volume cap, and writes in Eda's voice. This runner drives
-a local Cursor agent (Cursor SDK) so that intelligence runs unattended.
+a Claude Code agent (Claude Agent SDK) so that intelligence runs unattended,
+on the Mac or in GitHub Actions.
 
 Modes:
-  weekly     — generate next week's Trening calendar sessions (adaptive).
-  quarterly  — one week before the current program ends, generate the next
+  weekly     - generate next week's Trening calendar sessions (adaptive).
+  quarterly  - one week before the current program ends, generate the next
                training block in Notion.
 
-The agent loads project settings (AGENTS.md, skills, .cursor/mcp.json) via
-setting_sources, so it has the same tools and persona as the interactive coach.
-A carve-out in AGENTS.md authorises THIS runner to write the calendar / Notion
-without interactive confirmation.
+The agent loads project settings (CLAUDE.md -> AGENTS.md, .claude/skills,
+.mcp.json) via setting_sources, so it has the same tools and persona as the
+interactive coach. A carve-out in AGENTS.md authorises THIS runner to write the
+calendar / Notion without interactive confirmation.
 
 Requirements (one-time):
-  1. pip install cursor-sdk          (added to servers/requirements.txt)
-  2. CURSOR_API_KEY in .env          (cursor.com/dashboard/integrations)
+  1. pip install claude-agent-sdk         (in servers/requirements.txt)
+  2. npm install -g @anthropic-ai/claude-code
+  3. ANTHROPIC_API_KEY in the environment (LOCAL_ENV_FILE locally, repository
+     secrets in GitHub Actions)
 
 Exit codes: 0 ok / skipped, 1 startup failure (auth/config), 2 run failed,
 3 missing prerequisite.
@@ -27,6 +30,7 @@ Exit codes: 0 ok / skipped, 1 startup failure (auth/config), 2 run failed,
 from __future__ import annotations
 
 import argparse
+import asyncio
 import os
 import sys
 from datetime import date
@@ -37,7 +41,15 @@ sys.path.insert(0, str(ROOT))
 
 # Trigger the quarterly job when the current program ends within this many days.
 QUARTER_LOOKAHEAD_DAYS = 8
-DEFAULT_MODEL = os.environ.get("COACH_AGENT_MODEL", "auto")
+DEFAULT_MODEL = os.environ.get("COACH_AGENT_MODEL", "claude-opus-5")
+
+# Ceiling per run so a confused agent cannot spin forever. Weekly needs roughly
+# 30-60 turns of Garmin/Notion/calendar reads plus the edit-and-push; the
+# quarterly build is a bigger piece of work.
+MAX_TURNS = {"weekly": 120, "quarterly": 200}
+
+
+LOCAL_ENV_FILE = ".env"
 
 
 def load_env_file(path: Path) -> None:
@@ -74,8 +86,15 @@ def _quarter_due(force: bool) -> bool:
         print("Quarterly: could not read program end date; skipping.", file=sys.stderr)
         return False
     days_left = (end - date.today()).days
-    if 0 <= days_left <= QUARTER_LOOKAHEAD_DAYS:
-        print(f"Quarterly: program ends in {days_left}d — generating next block.")
+    # Fire once the block is inside the lookahead *or already over*. The old
+    # `0 <= days_left` lower bound meant a program that expired without anyone
+    # noticing could never trigger a rebuild — the window had closed behind it,
+    # and the job would skip forever. Overdue is the strongest reason to run.
+    if days_left <= QUARTER_LOOKAHEAD_DAYS:
+        if days_left < 0:
+            print(f"Quarterly: program ended {-days_left}d ago — generating next block.")
+        else:
+            print(f"Quarterly: program ends in {days_left}d — generating next block.")
         return True
     print(f"Quarterly: program ends in {days_left}d (>{QUARTER_LOOKAHEAD_DAYS}); skipping.")
     return False
@@ -96,7 +115,9 @@ Steps:
    one mobility), honouring readiness and drinking-day rules.
 5. Edit `CALENDAR_WEEK` in `data/q3_training_program.py` to the target week's
    sessions, then push to the Trening calendar:
-   `./.venv/bin/python scripts/push_calendar_plan.py --confirm --reset`
+   `python scripts/push_calendar_plan.py --confirm --reset`
+   (the calendar backend is picked automatically: EventKit on the Mac,
+   iCloud CalDAV in the cloud - you do not need to configure it)
 
 This is the AUTHORISED automated weekly run: create the Trening calendar events
 WITHOUT asking me for confirmation (see the automation carve-out in AGENTS.md).
@@ -116,23 +137,58 @@ Steps:
 4. Edit `data/q3_training_program.py`: update `PROGRAM_OVERVIEW`, `WEEKS`, and
    set a NEW `DB_TITLE` for the new quarter so a fresh database is created.
 5. Publish to Notion:
-   `./.venv/bin/python scripts/bootstrap_notion.py && ./.venv/bin/python scripts/prettify_notion.py`
+   `python scripts/bootstrap_notion.py && python scripts/prettify_notion.py`
 
 This is the AUTHORISED automated quarterly run: write the new quarter to Notion
 WITHOUT asking me for confirmation (see the automation carve-out in AGENTS.md).
 Keep all copy in Eda's voice. End with a one-line summary of the new block."""
 
 
-def _build_options(api_key: str):
-    from cursor_sdk import AgentOptions, LocalAgentOptions
+def _options(mode: str):
+    from claude_agent_sdk import ClaudeAgentOptions  # noqa: PLC0415
 
-    return AgentOptions(
-        api_key=api_key,
+    # The agent launches the MCP servers itself. Point them at this checkout and
+    # this interpreter so one .mcp.json works on the Mac and on a CI runner.
+    os.environ.setdefault("TRENINGSAGENT_ROOT", str(ROOT))
+    os.environ.setdefault("TRENINGSAGENT_PYTHON", sys.executable)
+
+    return ClaudeAgentOptions(
+        cwd=str(ROOT),
         model=DEFAULT_MODEL,
-        # Load project AGENTS.md + skills + .cursor/mcp.json so the headless
-        # agent has the same persona and MCP tools as the interactive coach.
-        local=LocalAgentOptions(cwd=str(ROOT), setting_sources=["all"]),
+        # "project" loads CLAUDE.md (-> AGENTS.md), .claude/skills, .mcp.json
+        # and .claude/settings.json, so the headless coach has the same persona
+        # and tools as the interactive one. "user" adds personal settings when
+        # this runs on the Mac.
+        setting_sources=["user", "project"],
+        # Unattended: nobody is here to approve a prompt. Writes stay fenced -
+        # calendar_mcp refuses every calendar except Trening.
+        permission_mode="bypassPermissions",
+        max_turns=MAX_TURNS[mode],
     )
+
+
+async def _run(mode: str, prompt: str) -> tuple[str, str]:
+    """Drive the agent to completion; return (status, final text)."""
+    from claude_agent_sdk import (  # noqa: PLC0415
+        AssistantMessage,
+        ResultMessage,
+        TextBlock,
+        query,
+    )
+
+    status = "unknown"
+    final = ""
+    async for message in query(prompt=prompt, options=_options(mode)):
+        if isinstance(message, AssistantMessage):
+            for block in message.content:
+                if isinstance(block, TextBlock) and block.text.strip():
+                    # Stream progress into the job log so a failed run can be
+                    # diagnosed from the GitHub Actions output alone.
+                    print(block.text.strip(), flush=True)
+        elif isinstance(message, ResultMessage):
+            final = getattr(message, "result", "") or ""
+            status = "error" if getattr(message, "is_error", False) else "finished"
+    return status, final
 
 
 def main() -> int:
@@ -145,44 +201,42 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    load_env_file(ROOT / ".env")
+    load_env_file(ROOT / LOCAL_ENV_FILE)
 
-    api_key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not api_key:
+    # Gate first: the quarterly job runs daily and does nothing on ~355 of those
+    # days, so it should exit cleanly without needing a key or the SDK at all.
+    if args.mode == "quarterly" and not _quarter_due(args.force):
+        return 0
+
+    if not os.environ.get("ANTHROPIC_API_KEY", "").strip():
         print(
-            "ERROR: CURSOR_API_KEY not set. Create one at "
-            "cursor.com/dashboard/integrations and add it to .env.",
+            "ERROR: ANTHROPIC_API_KEY not set. Create a key at "
+            "console.anthropic.com and add it to the local env file or to the "
+            "repository secrets (GitHub Actions).",
             file=sys.stderr,
         )
         return 3
 
     try:
-        from cursor_sdk import Agent  # noqa: PLC0415
+        import claude_agent_sdk  # noqa: F401,PLC0415
     except ImportError:
         print(
-            "ERROR: cursor-sdk not installed. Run: "
-            "./.venv/bin/pip install cursor-sdk",
+            "ERROR: claude-agent-sdk not installed. Run: "
+            "pip install -r servers/requirements.txt",
             file=sys.stderr,
         )
         return 3
-
-    if args.mode == "quarterly" and not _quarter_due(args.force):
-        return 0
 
     prompt = WEEKLY_PROMPT if args.mode == "weekly" else QUARTERLY_PROMPT
 
     try:
-        from cursor_sdk import CursorAgentError  # noqa: PLC0415
-
-        result = Agent.prompt(prompt, _build_options(api_key))
+        status, text = asyncio.run(_run(args.mode, prompt))
     except Exception as e:  # noqa: BLE001
-        # CursorAgentError (and friends) = the run never executed.
-        name = type(e).__name__
-        print(f"Coach agent startup failed ({name}): {e}", file=sys.stderr)
+        # Startup failures - missing `claude` CLI, bad key, an MCP server that
+        # will not launch - land here; the run never executed.
+        print(f"Coach agent startup failed ({type(e).__name__}): {e}", file=sys.stderr)
         return 1
 
-    status = getattr(result, "status", "unknown")
-    text = getattr(result, "result", "") or ""
     print(f"Coach agent [{args.mode}] status={status}")
     if text:
         print(text)

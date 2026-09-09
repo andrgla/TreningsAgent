@@ -1,0 +1,35 @@
+name: garmin-refresh
+
+# Keeps the Garmin session warm so no other job ever hits the slow, rate-limit
+# prone cold SSO chain. The di_token lives ~22 h; refreshing every 6 h means the
+# cloud never needs to log in with a password.
+#
+# Cron is UTC and GitHub has no timezone setting. These are Europe/Oslo winter
+# times; in summer (CEST) everything lands an hour later. Harmless for a
+# keep-warm job.
+on:
+  schedule:
+    - cron: "15 23,5,11,17 * * *" # 00:15 / 06:15 / 12:15 / 18:15 Oslo (CET)
+  workflow_dispatch:
+
+concurrency:
+  # Two Garmin logins at once is exactly what causes the 429 hang.
+  group: garmin
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          garmin-tokens-b64: ${{ secrets.GARMIN_TOKENS_B64 }}
+
+      - name: Refresh Garmin token
+        env:
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: python scripts/garmin_login.py

@@ -1,0 +1,37 @@
+name: weekly-observation
+
+# Posts a Garmin-backed progress note to the Workout Coach page in Notion.
+# Deterministic — no agent, no API key.
+#
+# Cron is UTC. These are Europe/Oslo winter times (CET); in summer they land an
+# hour later than the label.
+on:
+  schedule:
+    - cron: "30 6 * * 1" # Mon 07:30 Oslo
+    - cron: "0 11 * * 3" # Wed 12:00 Oslo
+    - cron: "0 19 * * 0" # Sun 20:00 Oslo
+  workflow_dispatch:
+
+concurrency:
+  group: garmin
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          notion-state-json: ${{ secrets.NOTION_STATE_JSON }}
+          garmin-tokens-b64: ${{ secrets.GARMIN_TOKENS_B64 }}
+
+      - name: Post weekly observation
+        env:
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_WORKOUT_COACH_PAGE_ID: ${{ secrets.NOTION_WORKOUT_COACH_PAGE_ID }}
+        run: python scripts/post_weekly_observation.py --refresh

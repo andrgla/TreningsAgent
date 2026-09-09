@@ -1,7 +1,10 @@
-"""Apple Calendar MCP with Trening-only write access.
+"""Calendar MCP with Trening-only write access.
 
 Reads all calendars. Creates and deletes events only on the calendar named
 Trening (configurable via TRAINING_CALENDAR_NAME or CALENDAR_WRITABLE_NAME).
+
+Backed by macOS EventKit locally and iCloud CalDAV in the cloud — see
+calendar_backend.
 """
 
 from __future__ import annotations
@@ -12,7 +15,7 @@ from datetime import date, datetime, timedelta
 
 from mcp.server.fastmcp import FastMCP
 
-from apple_bridge import (
+from calendar_backend import (
     create_event as bridge_create,
     delete_event as bridge_delete,
     list_calendars as bridge_list_calendars,

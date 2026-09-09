@@ -2,6 +2,11 @@ mcp[cli]>=1.2.0
 httpx>=0.27
 garminconnect>=0.2.25
 
+# iCloud CalDAV calendar backend (servers/caldav_backend.py). Required in the
+# cloud, where macOS EventKit is unavailable; unused on the Mac.
+caldav>=1.3.9
+
 # Headless coach automation (scripts/run_coach_agent.py). Optional: only needed
-# for the coach-weekly / coach-quarterly scheduled jobs.
-cursor-sdk
+# for the coach-weekly / coach-quarterly scheduled jobs. Also needs the Claude
+# Code CLI: npm install -g @anthropic-ai/claude-code
+claude-agent-sdk>=0.1.0

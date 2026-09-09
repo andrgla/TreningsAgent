@@ -1,0 +1,57 @@
+name: TreningsAgent setup
+description: Python deps, private files, and a warm Garmin token store.
+
+inputs:
+  agent:
+    description: Also install the Claude Code CLI (needed by the coach jobs).
+    default: "false"
+  athlete-md-b64:
+    description: Base64 of ATHLETE.md.
+    default: ""
+  notion-state-json:
+    description: Contents of data/notion_state.json.
+    default: ""
+  garmin-tokens-b64:
+    description: Base64 of a Garmin token file, used only on a cold cache.
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+        cache-dependency-path: servers/requirements.txt
+
+    - name: Install Python dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r servers/requirements.txt
+
+    - name: Install Claude Code CLI
+      if: inputs.agent == 'true'
+      shell: bash
+      run: |
+        npm install -g @anthropic-ai/claude-code
+        claude --version
+
+    # The key never hits, so every run restores the newest previous cache via
+    # restore-keys and saves a fresh one at post — a rolling token store.
+    # Restore comes before materialise so a cached token wins over the seed.
+    - name: Restore Garmin token store
+      uses: actions/cache@v4
+      with:
+        path: data/.garminconnect
+        key: garmin-tokens-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: |
+          garmin-tokens-
+
+    - name: Materialise private files
+      shell: bash
+      env:
+        ATHLETE_MD_B64: ${{ inputs.athlete-md-b64 }}
+        NOTION_STATE_JSON: ${{ inputs.notion-state-json }}
+        GARMIN_TOKENS_B64: ${{ inputs.garmin-tokens-b64 }}
+      run: python scripts/ci_materialise_private.py

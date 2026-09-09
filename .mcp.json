@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "calendar": {
+      "command": "${TRENINGSAGENT_PYTHON:-python3}",
+      "args": ["${TRENINGSAGENT_ROOT}/servers/calendar_mcp.py"],
+      "env": {
+        "PYTHONPATH": "${TRENINGSAGENT_ROOT}/servers",
+        "APPLE_BRIDGE_BIN": "${TRENINGSAGENT_ROOT}/node_modules/apple-calendar-mcp/swift/.build/release/apple-bridge",
+        "TRAINING_CALENDAR_NAME": "${TRAINING_CALENDAR_NAME:-Trening}"
+      }
+    },
+    "garmin": {
+      "command": "${TRENINGSAGENT_PYTHON:-python3}",
+      "args": ["${TRENINGSAGENT_ROOT}/servers/garmin_mcp.py"],
+      "env": {
+        "PYTHONPATH": "${TRENINGSAGENT_ROOT}/servers",
+        "GARMINTOKENS": "${TRENINGSAGENT_ROOT}/data/.garminconnect"
+      }
+    },
+    "sio-gym": {
+      "command": "${TRENINGSAGENT_PYTHON:-python3}",
+      "args": ["${TRENINGSAGENT_ROOT}/servers/sio_gym_mcp.py"],
+      "env": {
+        "PYTHONPATH": "${TRENINGSAGENT_ROOT}/servers"
+      }
+    },
+    "notion": {
+      "command": "${TRENINGSAGENT_PYTHON:-python3}",
+      "args": ["${TRENINGSAGENT_ROOT}/servers/notion_mcp.py"],
+      "env": {
+        "PYTHONPATH": "${TRENINGSAGENT_ROOT}"
+      }
+    }
+  }
+}

@@ -174,7 +174,8 @@ cancelling late) twice in 30 days → 30-day booking ban.
   explicit confirmation.**
   - **Automation carve-out:** the scheduled headless coach
     (`scripts/run_coach_agent.py`, run by the `coach-weekly` / `coach-quarterly`
-    launchd jobs) IS pre-authorised to create **Trening** calendar events and
+    jobs — GitHub Actions in the cloud, launchd if still installed on the Mac)
+    IS pre-authorised to create **Trening** calendar events and
     write the quarter plan to Notion without interactive confirmation — that is
     the whole point of the automation. This applies **only** to that scheduled
     runner. Every interactive chat session still requires my explicit
