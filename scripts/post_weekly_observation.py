@@ -45,7 +45,10 @@ from garmin_mcp import api, recent_activities  # noqa: E402
 from garmin_trends import collect_trends  # noqa: E402
 
 SECTION_MARKER = "My recent observations"
-DB_TITLE = "Q3 Training Weeks"
+try:
+    from data.q3_training_program import DB_TITLE
+except Exception:  # pragma: no cover - fallback if program module moves
+    DB_TITLE = "Q4 Training Weeks"
 _STRENGTH = frozenset({"strength_training", "fitness_equipment", "hiit", "cross_training", "indoor_cardio"})
 _MOBILITY = frozenset({"yoga", "pilates", "breathwork"})
 

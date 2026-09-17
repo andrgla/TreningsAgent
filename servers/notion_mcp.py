@@ -24,7 +24,10 @@ from notion_client import (  # noqa: E402
 
 mcp = FastMCP("notion")
 
-DB_TITLE = "Q3 Training Weeks"
+try:
+    from data.q3_training_program import DB_TITLE
+except Exception:  # pragma: no cover - fallback if program module moves
+    DB_TITLE = "Q4 Training Weeks"
 
 
 def _dump(obj) -> str:

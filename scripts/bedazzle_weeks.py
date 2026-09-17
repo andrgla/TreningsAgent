@@ -40,7 +40,10 @@ from notion_client import (  # noqa: E402
     workout_coach_page_id,
 )
 
-DB_TITLE = "Q3 Training Weeks"
+try:
+    from data.q3_training_program import DB_TITLE
+except Exception:  # pragma: no cover - fallback if program module moves
+    DB_TITLE = "Q4 Training Weeks"
 
 # Week number -> emoji (from Andrea's palette): seed → bloom → ocean → disco → moon.
 WEEK_EMOJI = {

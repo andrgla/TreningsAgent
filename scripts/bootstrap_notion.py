@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create Q3 training database on Workout Coach Notion page and populate weeks."""
+"""Create the current quarter's training database on the Workout Coach Notion page and populate weeks."""
 
 from __future__ import annotations
 
@@ -27,7 +27,14 @@ def load_env_file(path: Path) -> None:
 
 load_env_file(ROOT / ".env")
 
-from data.q3_training_program import PROGRAM_OVERVIEW, WEEKS  # noqa: E402
+from data.q3_training_program import (  # noqa: E402
+    DB_TITLE,
+    HEADER_CALLOUT,
+    OVERVIEW_SENTINEL,
+    PHASE_OPTIONS,
+    PROGRAM_OVERVIEW,
+    WEEKS,
+)
 from notion_client import (  # noqa: E402
     find_child_database,
     get_page,
@@ -38,13 +45,6 @@ from notion_client import (  # noqa: E402
     workout_coach_page_id,
 )
 
-DB_TITLE = "Q3 Training Weeks"
-PHASE_OPTIONS = [
-    {"name": "Base", "color": "blue"},
-    {"name": "Build", "color": "orange"},
-    {"name": "Peak", "color": "red"},
-    {"name": "Taper prep", "color": "green"},
-]
 STATUS_OPTIONS = [
     {"name": "Planned", "color": "default"},
     {"name": "In progress", "color": "yellow"},
@@ -68,12 +68,7 @@ def _overview_blocks() -> list[dict]:
             "object": "block",
             "type": "callout",
             "callout": {
-                "rich_text": _rt(
-                    "**Hi, I'm Eda — your coach.** 🫒 **Trondheim Halvmaraton** · "
-                    "5:25/km · Q3 build (Jul–Aug 2026). Calendar = when you show up · "
-                    "this database = what each week looks like. Trust the plan, feel "
-                    "your body, we call it in together. ✨"
-                ),
+                "rich_text": _rt(HEADER_CALLOUT),
                 "icon": {"type": "emoji", "emoji": "🫒"},
                 "color": "pink_background",
             },
@@ -99,7 +94,7 @@ def ensure_overview_on_page(page_id: str) -> None:
     children = list_block_children(page_id)
     if any(
         b.get("type") == "callout"
-        and "Trondheim Halvmaraton" in str(b.get("callout", {}).get("rich_text", ""))
+        and OVERVIEW_SENTINEL in str(b.get("callout", {}).get("rich_text", ""))
         for b in children
     ):
         print("Overview blocks already present — skipping.")
