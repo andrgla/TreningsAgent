@@ -240,44 +240,59 @@ WEEKS: list[dict] = [
     },
 ]
 
-# Week 1 — Reset (Mon 21 Sep – Sun 27 Sep)
-# Thu yoga 08:45 already exists on the Trening calendar (Yoga1 : Øya
-# treningssenter) — deliberately not duplicated here.
-# Innflyttingsfest Fri 25 Sep 18:00 → Sat 26 is rest; long run moved to Sun 27.
+# Week 2 — Reset (Mon 28 Sep – Sun 4 Oct) · target 17–19 km, 2× legs, 1× yoga
+#
+# Calendar constraints read from iCloud for this week:
+#   Mon 28  ML møte 08–14 · Kimmo 14–15:15 · WAI styremøte 16–18 · WAI møte 18–20
+#           → fully booked 08:00–20:00, AND it is the morning after "Cava Bdag"
+#             (all-day Sun 27) → rest day, no session placed.
+#   Tue 29  Lesing 08–12 · TTT09 12:15–14 · tennis/golf 13–16 → strength at 17:00.
+#   Wed 30  "Løpe med Mona og Tuvis" 07:30–08:30 already on Trening — that IS the
+#           week's second easy run; deliberately not duplicated here.
+#   Thu 1   Forelesning 08:15–10:00 clashes with the Øya 08:45 yoga class again,
+#           so the easy run takes the 10:15 window and yoga moves to Sunday.
+#           "Møte Sopra" 16:45–22:45 is a long corporate evening → treated as a
+#           possible drinking night, so Friday is midday, never early.
+#   Fri 2   Golf 15:30–18:00 → glutes at 12:30.
+#   Sat 3   Completely free → long run, the one true open day of the week.
+#   Sun 4   Kongsgårdbanen 14:15 → yoga late morning, well clear of it.
+#
+# No hard quality this week by design: HRV ~45 ms (down from ~50) and sleep
+# averaging 7.1 h with a 5.8 h night on Sep 26. Strides only.
 CALENDAR_WEEK: list[dict] = [
     {
-        "date": "2026-09-21",
+        "date": "2026-09-29",
         "title": "🦵 Legs + glutes (strength)",
-        "start": "2026-09-21T16:00:00",
-        "end": "2026-09-21T17:00:00",
-        "notes": "Week 1 of the rebuild — we open with the headline, not the side quest. 🍑 Hip thrust, RDL, split squat, glute bridge · RPE 6–7, leave two reps in the tank. Log in Hevy on the watch. Done by 17:00 so you're calm for WAI at 18. Future you already lives in these jeans. — Eda 🫒",
+        "start": "2026-09-29T17:00:00",
+        "end": "2026-09-29T18:00:00",
+        "notes": "Ten days since your last lift, babe — so this one is the whole week's headline. 🍑 Hip thrust, RDL, split squat, glute bridge · RPE 6–7, two reps left in the tank. Log in Hevy on the watch. Golf's done at 16, this is your 17:00. Nothing about the glutes goal happens by accident; it happens on Tuesdays. — Eda 🫒",
     },
     {
-        "date": "2026-09-24",
-        "title": "🏃 Easy run 5 km",
-        "start": "2026-09-24T11:00:00",
-        "end": "2026-09-24T11:45:00",
-        "notes": "6:30–6:50/km · HR under 155 · yes, that slow — on purpose. 🌱 Your easy runs have been 5:52/km at HR 170; that's medium dressed as easy. Slow now = fast in Praha. Lecture's done at 10, the window is yours. Talk-test the whole way. — Eda 🫒",
+        "date": "2026-10-01",
+        "title": "🏃 Easy run 5 km + strides",
+        "start": "2026-10-01T10:15:00",
+        "end": "2026-10-01T11:00:00",
+        "notes": "6:30–6:50/km · HR under 155 · then 4×20s strides, floaty and fast, full walk-back between. 🌱 Garmin says your easy runs are 5:52/km at HR 166 — that's medium wearing an easy costume. We slow down now so April feels free. Lecture ends at 10, Sopra isn't until 13 — the window is yours. Talk-test the whole way. — Eda 🫒",
     },
     {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "title": "🍑 Glute focus (strength)",
-        "start": "2026-09-25T12:30:00",
-        "end": "2026-09-25T13:30:00",
-        "notes": "Second legs hit of the week — that's the promise kept. ✨ Abduction, kickbacks, bridges, walking lunges · RPE 7. Banked before golf at 15:30 and the innflyttingsfest tonight, so the week is already won before the playlist starts. 🩩 — Eda 🫒",
+        "start": "2026-10-02T12:30:00",
+        "end": "2026-10-02T13:30:00",
+        "notes": "Session two of two — this is the promise kept. ✨ Abduction, kickbacks, bridges, walking lunges · RPE 7. Midday on purpose: last night's Sopra thing ran to 22:45, so no alarm was ever going to happen, and we don't punish, we adapt. 🌙 Banked before golf at 15:30 — week already won. — Eda 🫒",
     },
     {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
+        "title": "🏃 Long run 8 km",
+        "start": "2026-10-03T11:00:00",
+        "end": "2026-10-03T12:00:00",
+        "notes": "The centrepiece, and Saturday is wide open — not one thing on the calendar. 💫 Easy 6:40–7:00/km, sun still up, zero watch pressure. Eight is one more than last week and that is exactly the right amount more. 🌷 Sleep 8 h tonight — that's the actual session, the run is just the fun part. Brick two of Praha. — Eda 🫒",
+    },
+    {
+        "date": "2026-10-04",
         "title": "🧘‍♀️ Yoga / mobility",
-        "start": "2026-09-26T16:00:00",
-        "end": "2026-09-26T17:00:00",
-        "notes": "Morning-after day — deliberately late and deliberately gentle. 🌙 No alarm, no pace, no guilt. Hips, hamstrings, long spine, slow breathing. (Thursday's Øya 08:45 class clashed with your lecture, so mobility lives here this week.) Rest is a session too. — Eda 🫒",
-    },
-    {
-        "date": "2026-09-27",
-        "title": "🏃 Long run 7 km",
-        "start": "2026-09-27T11:00:00",
-        "end": "2026-09-27T11:50:00",
-        "notes": "Moved off Saturday because of Friday's fest — this is the week's centrepiece. 💫 Easy 6:40–7:00/km, no watch pressure, sun still up. Back in time for Kongsgårdbanen at 14:15 and Cava's bursdag tonight. This is the first brick of Praha. — Eda 🫒",
+        "start": "2026-10-04T11:00:00",
+        "end": "2026-10-04T12:00:00",
+        "notes": "Thursday's Øya 08:45 clashed with your lecture again, so mobility lives here — and honestly Sunday suits her better. 🩰 Hips, hamstrings, long spine, slow breathing. Done and glowing well before Kongsgårdbanen at 14:15. Three runs, two legs days, one yoga: that's her rhythm, and you just lived it. 🩵 — Eda 🫒",
     },
 ]
